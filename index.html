@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart City Matrix Hub | Portal Principal TP2</title>
+  <style>
+    :root {
+      --sidebar-bg: #0F172A;
+      --sidebar-hover: #1E293B;
+      --accent: #38BDF8;
+      --primary: #1A2B4C;
+      --bg: #F8FAFC;
+      --text: #334155;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    /* Sidebar Lateral */
+    .sidebar {
+      width: 290px;
+      background: var(--sidebar-bg);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      padding: 22px 20px;
+      background: #0284C7;
+      text-align: center;
+    }
+
+    .sidebar-header h2 { margin: 0; font-size: 1.25rem; font-weight: 700; }
+    .sidebar-header p { margin: 4px 0 0 0; font-size: 0.78rem; opacity: 0.9; }
+
+    .nav-list {
+      list-style: none;
+      padding: 15px 0;
+      margin: 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #94A3B8;
+      transition: all 0.2s ease;
+      border-left: 4px solid transparent;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--sidebar-hover);
+      color: white;
+      border-left-color: var(--accent);
+    }
+
+    .nav-icon { font-size: 1.2rem; }
+
+    .sidebar-footer {
+      padding: 15px 20px;
+      border-top: 1px solid #1E293B;
+      font-size: 0.75rem;
+      color: #64748B;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* Contenedor del Iframe */
+    .content-area {
+      flex: 1;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVEGACIÓN LATERAL -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Smart City Matrix Hub</h2>
+      <p>Álgebra Lineal Aplicada — TP2</p>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="loadModule('modulo1.html', this)">
+        <span class="nav-icon">📊</span>
+        <span>Módulo 1: Tipos de Matrices</span>
+      </li>
+      <li class="nav-item" onclick="loadModule('modulo2.html', this)">
+        <span class="nav-icon">➕</span>
+        <span>Módulo 2: Suma y Calibración</span>
+      </li>
+      <li class="nav-item" onclick="loadModule('modulo3.html', this)">
+        <span class="nav-icon">🖼️</span>
+        <span>Módulo 3: Imágenes, RGB y SVD</span>
+      </li>
+      <li class="nav-item" onclick="loadModule('modulo4.html', this)">
+        <span class="nav-icon">🧩</span>
+        <span>Módulo 4: Tetris de Dimensiones</span>
+      </li>
+      <li class="nav-item" onclick="loadModule('modulo5.html', this)">
+        <span class="nav-icon">🐍</span>
+        <span>Módulo 5: Python y Termómetros</span>
+      </li>
+      <li class="nav-item" onclick="loadModule('modulo6.html', this)">
+        <span class="nav-icon">🤖</span>
+        <span>Módulo 6: IA, Visión y PageRank</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      Desarrollado con HTML5, CSS3 y JS.<br/>
+      Normas APA 7.ª edición — 2026.
+    </div>
+  </div>
+
+  <!-- ÁREA DE CARGA DINÁMICA DE MÓDULOS -->
+  <div class="content-area">
+    <iframe id="mainFrame" src="modulo1.html"></iframe>
+  </div>
+
+  <script>
+    function loadModule(file, element) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+      document.getElementById('mainFrame').src = file;
+    }
+  </script>
+</body>
+</html>

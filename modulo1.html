@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 1: Tipos de Matrices | Smart City TP2</title>
+  <style>
+    :root {
+      --primary: #1A2B4C;
+      --secondary: #2980B9;
+      --bg: #F4F6F9;
+      --card-bg: #FFFFFF;
+      --text: #2C3E50;
+      --border: #CBD5E1;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    header h1 { margin: 0 0 5px 0; font-size: 1.8rem; }
+    header p { margin: 0; font-size: 0.95rem; opacity: 0.85; }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    @media (max-width: 950px) {
+      .grid-layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 25px;
+    }
+
+    .card h2 {
+      color: var(--primary);
+      margin-top: 0;
+      font-size: 1.2rem;
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 6px;
+    }
+
+    .matrix-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .matrix-wrapper {
+      position: relative;
+      display: inline-block;
+      padding: 0 8px;
+    }
+
+    .matrix-wrapper::before, .matrix-wrapper::after {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0; width: 6px;
+      border: 2.5px solid var(--primary);
+    }
+
+    .matrix-wrapper::before { left: 0; border-right: none; border-radius: 6px 0 0 6px; }
+    .matrix-wrapper::after { right: 0; border-left: none; border-radius: 0 6px 6px 0; }
+
+    .matrix-grid {
+      display: grid;
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .cell {
+      width: 44px;
+      height: 40px;
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--primary);
+      transition: all 0.2s ease;
+    }
+
+    .cell:hover { background: #E0F2FE; border-color: var(--secondary); transform: scale(1.05); }
+    .cell-diag { background: #DBEAFE; border-color: #3B82F6; font-weight: bold; }
+    .cell-zero { background: #F1F5F9; color: #94A3B8; }
+
+    .type-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .btn-type {
+      background: #F1F5F9;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .btn-type:hover, .btn-type.active {
+      background: var(--secondary);
+      color: white;
+      border-color: var(--secondary);
+    }
+
+    .info-box {
+      background: #F8FAFC;
+      border-left: 4px solid var(--secondary);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-top: 15px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Módulo Interactivo N° 1: Clasificación de Matrices y Estructura m × n</h1>
+    <p>Definiciones Formales, Dimensiones y Tipología de Arreglos — TP2 (Normas APA)</p>
+  </header>
+
+  <div class="grid-layout">
+    
+    <div class="card">
+      <h2>1. Visualizador de Estructura Matricial</h2>
+      <p style="font-size:0.85rem; color:#64748B;">Selecciona una clasificación a la derecha para generar la grilla correspondiente:</p>
+      
+      <div class="matrix-container">
+        <div class="matrix-wrapper">
+          <div id="matrixGrid" class="matrix-grid"></div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <span class="badge" id="typeBadge">Matriz Identidad</span>
+        <div id="typeDesc">Selecciona un tipo de matriz.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Los 12 Tipos de Matrices del TP</h2>
+      <div class="type-buttons">
+        <button class="btn-type active" onclick="loadType('identidad', this)">1. Identidad (I₃)</button>
+        <button class="btn-type" onclick="loadType('cuadrada', this)">2. Cuadrada (3×3)</button>
+        <button class="btn-type" onclick="loadType('rectangular', this)">3. Rectangular (2×4)</button>
+        <button class="btn-type" onclick="loadType('fila', this)">4. Vector Fila (1×4)</button>
+        <button class="btn-type" onclick="loadType('columna', this)">5. Vector Columna (4×1)</button>
+        <button class="btn-type" onclick="loadType('nula', this)">6. Nula (0₃ₓ₃)</button>
+        <button class="btn-type" onclick="loadType('diagonal', this)">7. Diagonal</button>
+        <button class="btn-type" onclick="loadType('escalar', this)">8. Escalar</button>
+        <button class="btn-type" onclick="loadType('opuesta', this)">9. Opuesta (-A)</button>
+        <button class="btn-type" onclick="loadType('traspuesta', this)">10. Traspuesta (Aᵀ)</button>
+        <button class="btn-type" onclick="loadType('triang_sup', this)">11. Triang. Superior</button>
+        <button class="btn-type" onclick="loadType('triang_inf', this)">12. Triang. Inferior</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const matrixTypes = {
+      identidad: { name: "Matriz Identidad (I₃)", desc: "Matriz cuadrada donde todos los elementos de la diagonal principal son 1 y el resto son 0 (aᵢⱼ = 1 si i=j, aᵢⱼ = 0 si i≠j). Elemento neutro del producto.", data: [,,] },
+      cuadrada: { name: "Matriz Cuadrada (3×3)", desc: "Tiene el mismo número de filas que de columnas (m = n). Posee diagonal principal y secundaria.", data: [,,] },
+      rectangular: { name: "Matriz Rectangular (2×4)", desc: "El número de filas difiere del número de columnas (m ≠ n). Representa tablas no cuadradas de telemetría.", data: [,] },
+      fila: { name: "Vector Fila (1×4)", desc: "Matriz de dimensión 1 × n. Consta de una sola fila de elementos.", data: [] },
+      columna: { name: "Vector Columna (4×1)", desc: "Matriz de dimensión m × 1. Consta de una sola columna de valores.", data: [,[-5],,] },
+      nula: { name: "Matriz Nula (0₃ₓ₃)", desc: "Todos sus elementos aᵢⱼ son cero. Elemento neutro de la suma matricial.", data: [,,] },
+      diagonal: { name: "Matriz Diagonal", desc: "Matriz cuadrada donde todos los elementos fuera de la diagonal principal son cero.", data: [,,] },
+      escalar: { name: "Matriz Escalar", desc: "Matriz diagonal en la que todos los elementos de la diagonal principal son iguales entre sí (k ≠ 0).", data: [,,] },
+      opuesta: { name: "Matriz Opuesta (-A)", desc: "Se obtiene cambiando el signo de cada uno de los elementos de la matriz original A.", data: [[-5,-2,-8],[-1,-9,-4],[-3,-7,-6]] },
+      traspuesta: { name: "Matriz Traspuesta (Aᵀ)", desc: "Se obtiene intercambiando ordenadamente las filas por las columnas (aᵀᵢⱼ = aⱼᵢ).", data: [,,] },
+      triang_sup: { name: "Matriz Triangular Superior", desc: "Matriz cuadrada donde todos los elementos por debajo de la diagonal principal son cero (aᵢⱼ = 0 si i > j).", data: [,,] },
+      triang_inf: { name: "Matriz Triangular Inferior", desc: "Matriz cuadrada donde todos los elementos por encima de la diagonal principal son cero (aᵢⱼ = 0 si i < j).", data: [,,] }
+    };
+
+    function loadType(key, btnElement) {
+      if (btnElement) {
+        document.querySelectorAll('.btn-type').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+      }
+
+      const item = matrixTypes[key];
+      document.getElementById('typeBadge').textContent = item.name;
+      document.getElementById('typeDesc').textContent = item.desc;
+
+      const grid = document.getElementById('matrixGrid');
+      grid.innerHTML = '';
+      const cols = item.data.length;
+      grid.style.gridTemplateColumns = `repeat(${cols}, 44px)`;
+
+      item.data.forEach((row, i) => {
+        row.forEach((val, j) => {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          if (i === j && item.data.length === item.data.length && val !== 0) cell.classList.add('cell-diag');
+          if (val === 0) cell.classList.add('cell-zero');
+          cell.textContent = val;
+          grid.appendChild(cell);
+        });
+      });
+    }
+
+    window.onload = () => {
+      loadType('identidad', document.querySelector('.btn-type'));
+    };
+  </script>
+</body>
+</html>

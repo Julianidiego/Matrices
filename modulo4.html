@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 4: Tetris de Dimensiones | Smart City TP2</title>
+  <style>
+    :root {
+      --primary: #1A2B4C;
+      --secondary: #2980B9;
+      --accent: #10B981;
+      --danger: #EF4444;
+      --bg: #F4F6F9;
+      --card-bg: #FFFFFF;
+      --text: #2C3E50;
+      --border: #CBD5E1;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    header h1 { margin: 0 0 5px 0; font-size: 1.8rem; }
+    header p { margin: 0; font-size: 0.95rem; opacity: 0.85; }
+
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+    @media (max-width: 950px) { .grid-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card-bg); border-radius: 12px; padding: 20px;
+      border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px;
+    }
+    .card h2 { color: var(--primary); margin-top: 0; font-size: 1.2rem; border-bottom: 2px solid var(--secondary); padding-bottom: 6px; }
+
+    .selector-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+    .btn-sel {
+      flex: 1; min-width: 140px; background: #F1F5F9; border: 1px solid var(--border);
+      padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; color: var(--text);
+      font-size: 0.85rem; text-align: center;
+    }
+    .btn-sel:hover, .btn-sel.active { background: var(--secondary); color: white; border-color: var(--secondary); }
+
+    .tetris-arena {
+      background: #0F172A; border-radius: 12px; padding: 30px 20px; min-height: 240px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;
+    }
+    .game-stage { display: flex; align-items: center; justify-content: center; gap: 80px; position: relative; width: 100%; height: 160px; }
+    .tetris-block {
+      position: relative; background: #1E293B; border: 3px solid #38BDF8; border-radius: 8px;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s;
+      display: flex; flex-direction: column; align-items: center; padding: 8px;
+    }
+    .tetris-block.block-b { border-color: #34D399; }
+    .block-grid { display: grid; gap: 4px; }
+    .block-cell {
+      width: 26px; height: 26px; background: #0284C7; border-radius: 4px; color: white;
+      font-weight: bold; font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
+    }
+    .block-b .block-cell { background: #059669; }
+
+    .connector-pegs { position: absolute; right: -14px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; }
+    .peg { width: 12px; height: 12px; background: #38BDF8; border-radius: 3px; box-shadow: 0 0 8px #38BDF8; }
+    .connector-sockets { position: absolute; left: -14px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; }
+    .socket { width: 12px; height: 12px; background: #064E3B; border: 1.5px dashed #34D399; border-radius: 3px; }
+
+    .snap-success { border-color: var(--accent) !important; box-shadow: 0 0 25px var(--accent) !important; }
+    .snap-error { border-color: var(--danger) !important; box-shadow: 0 0 25px var(--danger) !important; animation: shake 0.4s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-12px); } 40%, 80% { transform: translateX(12px); } }
+
+    .game-banner { margin-top: 15px; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 0.88rem; text-align: center; }
+    .banner-success { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+    .banner-danger { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .banner-info { background: #E0F2FE; color: #075985; border: 1px solid #BAE6FD; }
+
+    .btn-play { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .btn-play:hover { background: #059669; }
+
+    .matrix-flex { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 20px 0; }
+    .matrix-box { text-align: center; }
+    .matrix-box h4 { margin: 0 0 6px 0; font-size: 0.85rem; color: var(--primary); }
+    .matrix-wrapper { position: relative; display: inline-block; padding: 0 8px; }
+    .matrix-wrapper::before, .matrix-wrapper::after { content: ""; position: absolute; top: 0; bottom: 0; width: 6px; border: 2.5px solid var(--primary); }
+    .matrix-wrapper::before { left: 0; border-right: none; border-radius: 5px 0 0 5px; }
+    .matrix-wrapper::after { right: 0; border-left: none; border-radius: 0 5px 5px 0; }
+    .matrix-grid { display: grid; gap: 5px; justify-content: center; }
+
+    .cell { width: 40px; height: 36px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; color: var(--primary); }
+    .cell-result { background: #E0F2FE; border-color: #7DD3FC; color: #0369A1; font-weight: bold; cursor: pointer; }
+    .cell-highlight-row { background: #FEF08A !important; border-color: #EAB308 !important; color: #713F12 !important; }
+    .cell-highlight-col { background: #FED7AA !important; border-color: #F97316 !important; color: #7C2D12 !important; }
+    .cell-highlight-target { background: #BBF7D0 !important; border-color: #22C55E !important; color: #14532D !important; }
+    .symbol { font-size: 1.4rem; font-weight: bold; color: var(--secondary); }
+    .info-box { background: #F8FAFC; border-left: 4px solid var(--secondary); padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 0.9rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Módulo Interactivo N° 4: Juego "Tetris de Dimensiones" Matriciales</h1>
+    <p>Simulador Jugable de Encastre Dimensional y Multiplicación de Matrices — TP2 (Normas APA)</p>
+  </header>
+
+  <div class="card">
+    <h2>1. Seleccionar Escenario de Juego</h2>
+    <div class="selector-bar">
+      <button class="btn-sel active" onclick="presetCase('AB', this)">1. Producto A × B (3×2 con 2×3) ¡Encastra!</button>
+      <button class="btn-sel" onclick="presetCase('BA', this)">2. Producto B × A (2×3 con 3×2) ¡Encastra!</button>
+      <button class="btn-sel" onclick="presetCase('FAIL', this)">3. Producto A × A (3×2 con 3×2) ¡Choca!</button>
+    </div>
+
+    <div class="tetris-arena">
+      <div class="game-stage">
+        <div id="blockM1" class="tetris-block">
+          <div style="color:white; font-size:0.75rem; font-weight:bold; margin-bottom:4px;" id="tagM1">Matriz A</div>
+          <div id="gridM1Visual" class="block-grid"></div>
+          <div id="pegsM1" class="connector-pegs"></div>
+        </div>
+
+        <div id="blockM2" class="tetris-block block-b">
+          <div style="color:white; font-size:0.75rem; font-weight:bold; margin-bottom:4px;" id="tagM2">Matriz B</div>
+          <div id="gridM2Visual" class="block-grid"></div>
+          <div id="socketsM2" class="connector-sockets"></div>
+        </div>
+      </div>
+
+      <div id="gameBanner" class="game-banner banner-info">
+        Presiona "▶ ¡Lanzar Piezas Tetris!" para iniciar el movimiento.
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:15px;">
+      <button class="btn-play" onclick="playTetrisAnimation()">▶ ¡Lanzar Piezas Tetris!</button>
+    </div>
+  </div>
+
+  <div class="grid-layout">
+    
+    <div class="card">
+      <h2>2. Calculadora de Producto Punto Fila × Columna</h2>
+      <p style="font-size:0.85rem; color:#64748B;">Haz clic en cualquier casilla azul de la Matriz Resultado para destacar la fila y columna:</p>
+
+      <div class="matrix-flex">
+        <div class="matrix-box"><h4 id="calcTagM1">Matriz A</h4><div class="matrix-wrapper"><div id="gridCalcM1" class="matrix-grid"></div></div></div>
+        <div class="symbol">×</div>
+        <div class="matrix-box"><h4 id="calcTagM2">Matriz B</h4><div class="matrix-wrapper"><div id="gridCalcM2" class="matrix-grid"></div></div></div>
+        <div class="symbol">=</div>
+        <div class="matrix-box"><h4 id="calcTagRes">Resultado</h4><div class="matrix-wrapper"><div id="gridCalcRes" class="matrix-grid"></div></div></div>
+      </div>
+
+      <div class="info-box" id="stepDetail">
+        Haz clic en una casilla azul del resultado para desplegar el producto punto.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Análisis Teórico de Rango y Submultiplicatividad</h2>
+      <div class="info-box">
+        <b>Propiedad de Submultiplicatividad del Rango:</b><br/>
+        $$\text{rango}(A \times B) \le \min(\text{rango}(A), \text{rango}(B))$$<br/>
+        Aunque el resultado $C = A \times B$ es de orden $3 \times 3$, su <b>rango es exactamente 2</b>, pues el sistema pasa a través del espacio intermedio de dimensión 2 (2 columnas de A / 2 filas de B).
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const matrixA = [,,];
+    const matrixB = [,];
+    let currentM1 = matrixA, currentM2 = matrixB;
+    let currentName1 = "A", currentName2 = "B";
+
+    function drawTetrisBlock(containerId, pegsId, rows, cols, isB = false) {
+      const container = document.getElementById(containerId);
+      container.style.gridTemplateColumns = `repeat(${cols}, 26px)`;
+      container.innerHTML = '';
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          const cell = document.createElement('div');
+          cell.className = 'block-cell';
+          cell.textContent = isB ? `b${i+1}${j+1}` : `a${i+1}${j+1}`;
+          container.appendChild(cell);
+        }
+      }
+      const pegContainer = document.getElementById(pegsId);
+      pegContainer.innerHTML = '';
+      const count = isB ? rows : cols;
+      for (let k = 0; k < count; k++) {
+        const item = document.createElement('div');
+        item.className = isB ? 'socket' : 'peg';
+        pegContainer.appendChild(item);
+      }
+    }
+
+    function renderStage(r1, c1, r2, c2) {
+      document.getElementById('tagM1').textContent = `${currentName1} (${r1}×${c1})`;
+      document.getElementById('tagM2').textContent = `${currentName2} (${r2}×${c2})`;
+      drawTetrisBlock('gridM1Visual', 'pegsM1', r1, c1, false);
+      drawTetrisBlock('gridM2Visual', 'socketsM2', r2, c2, true);
+
+      const b1 = document.getElementById('blockM1'), b2 = document.getElementById('blockM2');
+      b1.style.transform = 'translateX(0)'; b2.style.transform = 'translateX(0)';
+      b1.classList.remove('snap-success', 'snap-error'); b2.classList.remove('snap-success', 'snap-error');
+
+      const banner = document.getElementById('gameBanner');
+      banner.className = 'game-banner banner-info';
+      banner.textContent = `Dientes de M1 (${c1} cols) vs Zócalos de M2 (${r2} filas). ¡Listos para probar encastre!`;
+
+      updateCalculator(r1, c1, r2, c2);
+    }
+
+    function playTetrisAnimation() {
+      const c1 = currentM1.length, r2 = currentM2.length;
+      const b1 = document.getElementById('blockM1'), b2 = document.getElementById('blockM2');
+      const banner = document.getElementById('gameBanner');
+
+      b1.style.transform = 'translateX(35px)';
+      b2.style.transform = 'translateX(-35px)';
+
+      setTimeout(() => {
+        if (c1 === r2) {
+          b1.classList.add('snap-success'); b2.classList.add('snap-success');
+          banner.className = 'game-banner banner-success';
+          banner.innerHTML = `<b>¡ENCASTRE PERFECTO!</b> Columnas de M1 (${c1}) = Filas de M2 (${r2}). Matriz resultado sintetizada.`;
+        } else {
+          b1.classList.add('snap-error'); b2.classList.add('snap-error');
+          banner.className = 'game-banner banner-danger';
+          banner.innerHTML = `<b>¡INCOMPATIBLE / CHOQUE!</b> Columnas de M1 (${c1}) ≠ Filas de M2 (${r2}). Las piezas rebotan.`;
+          setTimeout(() => {
+            b1.style.transform = 'translateX(0)'; b2.style.transform = 'translateX(0)';
+          }, 500);
+        }
+      }, 700);
+    }
+
+    function updateCalculator(r1, c1, r2, c2) {
+      renderCalcGrid('gridCalcM1', currentM1);
+      renderCalcGrid('gridCalcM2', currentM2);
+
+      if (c1 === r2) {
+        const res = Array(r1).fill(0).map(() => Array(c2).fill(0));
+        for (let i = 0; i < r1; i++) {
+          for (let j = 0; j < c2; j++) {
+            for (let k = 0; k < c1; k++) {
+              res[i][j] += currentM1[i][k] * currentM2[k][j];
+            }
+          }
+        }
+        renderCalcGrid('gridCalcRes', res, true);
+      } else {
+        renderCalcGrid('gridCalcRes', null, false);
+      }
+    }
+
+    function renderCalcGrid(containerId, data, isResult = false) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      if (!data) {
+        container.innerHTML = '<div style="color:var(--danger); font-size:0.8rem; font-weight:bold; padding:10px;">Indefinido</div>';
+        return;
+      }
+      const cols = data.length;
+      container.style.gridTemplateColumns = `repeat(${cols}, 40px)`;
+
+      data.forEach((row, i) => {
+        row.forEach((val, j) => {
+          const cell = document.createElement('div');
+          cell.className = 'cell' + (isResult ? ' cell-result' : '');
+          cell.id = `${containerId}_${i}_${j}`;
+          cell.textContent = val;
+
+          if (isResult) cell.onclick = () => showDotProduct(i, j);
+          container.appendChild(cell);
+        });
+      });
+    }
+
+    function showDotProduct(rowIdx, colIdx) {
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('cell-highlight-row', 'cell-highlight-col', 'cell-highlight-target'));
+
+      const c1 = currentM1.length;
+      for (let j = 0; j < c1; j++) document.getElementById(`gridCalcM1_${rowIdx}_${j}`)?.classList.add('cell-highlight-row');
+      for (let i = 0; i < c1; i++) document.getElementById(`gridCalcM2_${i}_${colIdx}`)?.classList.add('cell-highlight-col');
+      document.getElementById(`gridCalcRes_${rowIdx}_${colIdx}`)?.classList.add('cell-highlight-target');
+
+      let terms = [];
+      let total = 0;
+      for (let k = 0; k < c1; k++) {
+        const v1 = currentM1[rowIdx][k];
+        const v2 = currentM2[k][colIdx];
+        total += v1 * v2;
+        terms.push(`(${v1} × ${v2})`);
+      }
+
+      document.getElementById('stepDetail').innerHTML = `
+        <b>Paso a paso Celda R<sub>${rowIdx+1}${colIdx+1}</sub>:</b><br/>
+        Multiplicamos la Fila ${rowIdx+1} de ${currentName1} por la Columna ${colIdx+1} de ${currentName2}:<br/>
+        <code>r<sub>${rowIdx+1}${colIdx+1}</sub> = ${terms.join(' + ')} = <b>${total}</b></code>.
+      `;
+    }
+
+    function presetCase(type, btnElement) {
+      document.querySelectorAll('.btn-sel').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      if (type === 'AB') { currentM1 = matrixA; currentM2 = matrixB; currentName1 = "A"; currentName2 = "B"; }
+      else if (type === 'BA') { currentM1 = matrixB; currentM2 = matrixA; currentName1 = "B"; currentName2 = "A"; }
+      else if (type === 'FAIL') { currentM1 = matrixA; currentM2 = matrixA; currentName1 = "A"; currentName2 = "A"; }
+
+      renderStage(currentM1.length, currentM1.length, currentM2.length, currentM2.length);
+    }
+
+    window.onload = () => {
+      presetCase('AB', document.querySelector('.btn-sel'));
+    };
+  </script>
+</body>
+</html>
