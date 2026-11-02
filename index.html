@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart City Matrix Hub | Portal Principal TP2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
       --sidebar-bg: #0F172A;
@@ -96,6 +101,103 @@
       height: 100%;
       border: none;
     }
+
+    :root {
+      --sidebar-bg: #0b0f19;
+      --sidebar-hover: rgba(0, 240, 255, 0.1);
+      --accent: #00f0ff;
+      --primary: #8b5cf6;
+      --bg: #0b0f19;
+      --text: #dbeafe;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.09), transparent 28%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.12), transparent 32%),
+        var(--bg);
+    }
+
+    .sidebar {
+      width: 300px;
+      background: rgba(11, 15, 25, 0.88);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 12px 0 40px rgba(0,0,0,0.35);
+      backdrop-filter: blur(18px);
+    }
+
+    .sidebar-header {
+      position: relative;
+      overflow: hidden;
+      padding: 26px 20px;
+      text-align: left;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.32));
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-header::after {
+      content: "";
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      right: -45px;
+      top: -55px;
+      border: 1px solid rgba(0,240,255,0.35);
+      border-radius: 50%;
+      box-shadow: 0 0 0 18px rgba(0,240,255,0.05), 0 0 0 36px rgba(0,240,255,0.04);
+    }
+
+    .sidebar-header h2 { position: relative; z-index: 1; letter-spacing: -0.03em; }
+    .sidebar-header p { position: relative; z-index: 1; color: #a5f3fc; }
+
+    .nav-list { padding: 18px 12px; }
+    .nav-item {
+      margin: 4px 0;
+      padding: 13px 14px;
+      border: 1px solid transparent;
+      border-left: 3px solid transparent;
+      border-radius: 10px;
+      color: #94a3b8;
+      transition: transform .2s ease, background .2s ease, border-color .2s ease, color .2s ease;
+    }
+    .nav-item:hover { transform: translateX(4px); }
+    .nav-item:hover, .nav-item.active {
+      background: linear-gradient(90deg, rgba(0,240,255,.12), rgba(139,92,246,.1));
+      color: #f8fafc;
+      border-color: rgba(0,240,255,.14);
+      border-left-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    }
+    .nav-icon { display: inline-flex; color: var(--accent); }
+    .nav-icon svg { width: 19px; height: 19px; stroke-width: 1.8; }
+    .sidebar-footer { border-top-color: rgba(255,255,255,.08); color: #64748b; }
+
+    .content-area {
+      position: relative;
+      background: linear-gradient(135deg, rgba(11,15,25,.75), rgba(15,23,42,.35));
+    }
+
+    .content-area::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .14;
+      background-image: linear-gradient(rgba(0,240,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,.12) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
+    }
+
+    .city-silhouette {
+      position: absolute;
+      right: 24px;
+      bottom: 18px;
+      width: min(42vw, 520px);
+      opacity: .28;
+      pointer-events: none;
+      filter: drop-shadow(0 0 16px rgba(0,240,255,.25));
+    }
   </style>
 </head>
 <body>
@@ -105,35 +207,46 @@
     <div class="sidebar-header">
       <h2>Smart City Matrix Hub</h2>
       <p>Álgebra Lineal Aplicada — TP2</p>
+      <svg class="city-silhouette" viewBox="0 0 520 150" aria-hidden="true">
+        <defs>
+          <linearGradient id="cityGlow" x1="0" x2="1">
+            <stop offset="0" stop-color="#00f0ff"/>
+            <stop offset="1" stop-color="#8b5cf6"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#cityGlow)" d="M0 150V91h34V62h24v45h25V31h30v76h18V74h28v33h20V18h42v89h20V52h25v55h18V83h32v24h20V42h38v65h28V70h20v37h20V20h40v87h28v43H0Z"/>
+        <path fill="none" stroke="#a5f3fc" stroke-width="2" d="M15 135h490M95 63v12m104-35v12m145 27v12m96-39v12"/>
+        <g fill="#e0f2fe"><circle cx="48" cy="111" r="2"/><circle cx="101" cy="54" r="2"/><circle cx="178" cy="68" r="2"/><circle cx="233" cy="39" r="2"/><circle cx="315" cy="64" r="2"/><circle cx="412" cy="45" r="2"/><circle cx="476" cy="73" r="2"/></g>
+      </svg>
     </div>
 
     <ul class="nav-list">
       <li class="nav-item active" onclick="loadModule('modulo1.html', this)">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon"><i data-lucide="bar-chart-3"></i></span>
         <span>Módulo 1: Tipos de Matrices</span>
       </li>
       <li class="nav-item" onclick="loadModule('modulo2.html', this)">
-        <span class="nav-icon">➕</span>
+        <span class="nav-icon"><i data-lucide="plus-square"></i></span>
         <span>Módulo 2: Suma y Calibración</span>
       </li>
       <li class="nav-item" onclick="loadModule('modulo3.html', this)">
-        <span class="nav-icon">🖼️</span>
+        <span class="nav-icon"><i data-lucide="image"></i></span>
         <span>Módulo 3: Imágenes, RGB y SVD</span>
       </li>
       <li class="nav-item" onclick="loadModule('modulo4.html', this)">
-        <span class="nav-icon">🧩</span>
+        <span class="nav-icon"><i data-lucide="puzzle"></i></span>
         <span>Módulo 4: Tetris de Dimensiones</span>
       </li>
       <li class="nav-item" onclick="loadModule('modulo5.html', this)">
-        <span class="nav-icon">🐍</span>
+        <span class="nav-icon"><i data-lucide="terminal-square"></i></span>
         <span>Módulo 5: Python y Termómetros</span>
       </li>
       <li class="nav-item" onclick="loadModule('modulo6.html', this)">
-        <span class="nav-icon">🤖</span>
+        <span class="nav-icon"><i data-lucide="bot"></i></span>
         <span>Módulo 6: IA, Visión y PageRank</span>
       </li>
       <li class="nav-item" onclick="loadModule('modulo7.html', this)">
-        <span class="nav-icon">🎮</span>
+        <span class="nav-icon"><i data-lucide="gamepad-2"></i></span>
         <span>Laboratorio de Gamificación Matricial</span>
       </li>
     </ul>
@@ -150,6 +263,8 @@
   </div>
 
   <script>
+    lucide.createIcons();
+
     function loadModule(file, element) {
       document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
       element.classList.add('active');
