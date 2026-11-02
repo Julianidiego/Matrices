@@ -191,7 +191,7 @@
       const container = document.getElementById(containerId);
       container.style.gridTemplateColumns = `repeat(${cols}, 42px)`;
       container.innerHTML = '';
-      const is2D = Array.isArray(data);
+      const is2D = Array.isArray(data[0]);
       if (is2D) data.forEach(row => row.forEach(v => addCell(container, v)));
       else data.forEach(v => addCell(container, v));
     }
@@ -212,7 +212,7 @@
       document.getElementById('valX3').textContent = x3;
 
       const X = [x1, x2, x3];
-      const Y =;
+      const Y = [];
       for (let i = 0; i < 3; i++) {
         let sum = 0;
         for (let j = 0; j < 3; j++) sum += W[i][j] * X[j];
@@ -228,7 +228,7 @@
     // Sobel
     const kernels = {
       sobelH: [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]],
-      sobelV: [[-1, -2, -1],,]
+      sobelV: [[-1, -2, -1], [0, 0, 0], [1, 2, 1]]
     };
 
     function initCanvasPattern() {
@@ -283,7 +283,7 @@
     }
 
     function stepPageRank() {
-      const vNext =;
+      const vNext = [0, 0, 0, 0];
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) vNext[i] += P[i][j] * vP[j];
       }

@@ -177,8 +177,8 @@
   </div>
 
   <script>
-    const matrixA = [,,];
-    const matrixB = [,];
+    const matrixA = [[1,2],[3,4],[5,6]];
+    const matrixB = [[2,1,0],[1,0,2]];
     let currentM1 = matrixA, currentM2 = matrixB;
     let currentName1 = "A", currentName2 = "B";
 
@@ -319,7 +319,7 @@
       else if (type === 'BA') { currentM1 = matrixB; currentM2 = matrixA; currentName1 = "B"; currentName2 = "A"; }
       else if (type === 'FAIL') { currentM1 = matrixA; currentM2 = matrixA; currentName1 = "A"; currentName2 = "A"; }
 
-      renderStage(currentM1.length, currentM1.length, currentM2.length, currentM2.length);
+      renderStage(currentM1.length, currentM1[0].length, currentM2.length, currentM2[0].length);
     }
 
     window.onload = () => {
