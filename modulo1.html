@@ -204,18 +204,18 @@
 
   <script>
     const matrixTypes = {
-      identidad: { name: "Matriz Identidad (I₃)", desc: "Matriz cuadrada donde todos los elementos de la diagonal principal son 1 y el resto son 0 (aᵢⱼ = 1 si i=j, aᵢⱼ = 0 si i≠j). Elemento neutro del producto.", data: [,,] },
-      cuadrada: { name: "Matriz Cuadrada (3×3)", desc: "Tiene el mismo número de filas que de columnas (m = n). Posee diagonal principal y secundaria.", data: [,,] },
-      rectangular: { name: "Matriz Rectangular (2×4)", desc: "El número de filas difiere del número de columnas (m ≠ n). Representa tablas no cuadradas de telemetría.", data: [,] },
-      fila: { name: "Vector Fila (1×4)", desc: "Matriz de dimensión 1 × n. Consta de una sola fila de elementos.", data: [] },
-      columna: { name: "Vector Columna (4×1)", desc: "Matriz de dimensión m × 1. Consta de una sola columna de valores.", data: [,[-5],,] },
-      nula: { name: "Matriz Nula (0₃ₓ₃)", desc: "Todos sus elementos aᵢⱼ son cero. Elemento neutro de la suma matricial.", data: [,,] },
-      diagonal: { name: "Matriz Diagonal", desc: "Matriz cuadrada donde todos los elementos fuera de la diagonal principal son cero.", data: [,,] },
-      escalar: { name: "Matriz Escalar", desc: "Matriz diagonal en la que todos los elementos de la diagonal principal son iguales entre sí (k ≠ 0).", data: [,,] },
+      identidad: { name: "Matriz Identidad (I₃)", desc: "Matriz cuadrada donde todos los elementos de la diagonal principal son 1 y el resto son 0 (aᵢⱼ = 1 si i=j, aᵢⱼ = 0 si i≠j). Elemento neutro del producto.", data: [[1,0,0],[0,1,0],[0,0,1]] },
+      cuadrada: { name: "Matriz Cuadrada (3×3)", desc: "Tiene el mismo número de filas que de columnas (m = n). Posee diagonal principal y secundaria.", data: [[4,7,2],[1,5,8],[6,3,9]] },
+      rectangular: { name: "Matriz Rectangular (2×4)", desc: "El número de filas difiere del número de columnas (m ≠ n). Representa tablas no cuadradas de telemetría.", data: [[12,18,21,25],[15,17,20,23]] },
+      fila: { name: "Vector Fila (1×4)", desc: "Matriz de dimensión 1 × n. Consta de una sola fila de elementos.", data: [[8,14,19,23]] },
+      columna: { name: "Vector Columna (4×1)", desc: "Matriz de dimensión m × 1. Consta de una sola columna de valores.", data: [[12],[-5],[8],[21]] },
+      nula: { name: "Matriz Nula (0₃ₓ₃)", desc: "Todos sus elementos aᵢⱼ son cero. Elemento neutro de la suma matricial.", data: [[0,0,0],[0,0,0],[0,0,0]] },
+      diagonal: { name: "Matriz Diagonal", desc: "Matriz cuadrada donde todos los elementos fuera de la diagonal principal son cero.", data: [[3,0,0],[0,7,0],[0,0,4]] },
+      escalar: { name: "Matriz Escalar", desc: "Matriz diagonal en la que todos los elementos de la diagonal principal son iguales entre sí (k ≠ 0).", data: [[5,0,0],[0,5,0],[0,0,5]] },
       opuesta: { name: "Matriz Opuesta (-A)", desc: "Se obtiene cambiando el signo de cada uno de los elementos de la matriz original A.", data: [[-5,-2,-8],[-1,-9,-4],[-3,-7,-6]] },
-      traspuesta: { name: "Matriz Traspuesta (Aᵀ)", desc: "Se obtiene intercambiando ordenadamente las filas por las columnas (aᵀᵢⱼ = aⱼᵢ).", data: [,,] },
-      triang_sup: { name: "Matriz Triangular Superior", desc: "Matriz cuadrada donde todos los elementos por debajo de la diagonal principal son cero (aᵢⱼ = 0 si i > j).", data: [,,] },
-      triang_inf: { name: "Matriz Triangular Inferior", desc: "Matriz cuadrada donde todos los elementos por encima de la diagonal principal son cero (aᵢⱼ = 0 si i < j).", data: [,,] }
+      traspuesta: { name: "Matriz Traspuesta (Aᵀ)", desc: "Se obtiene intercambiando ordenadamente las filas por las columnas (aᵀᵢⱼ = aⱼᵢ).", data: [[1,4,7],[2,5,8],[3,6,9]] },
+      triang_sup: { name: "Matriz Triangular Superior", desc: "Matriz cuadrada donde todos los elementos por debajo de la diagonal principal son cero (aᵢⱼ = 0 si i > j).", data: [[2,4,6],[0,5,7],[0,0,3]] },
+      triang_inf: { name: "Matriz Triangular Inferior", desc: "Matriz cuadrada donde todos los elementos por encima de la diagonal principal son cero (aᵢⱼ = 0 si i < j).", data: [[2,0,0],[4,5,0],[6,7,3]] }
     };
 
     function loadType(key, btnElement) {
@@ -237,7 +237,7 @@
         row.forEach((val, j) => {
           const cell = document.createElement('div');
           cell.className = 'cell';
-          if (i === j && item.data.length === item.data.length && val !== 0) cell.classList.add('cell-diag');
+          if (i === j && val !== 0) cell.classList.add('cell-diag');
           if (val === 0) cell.classList.add('cell-zero');
           cell.textContent = val;
           grid.appendChild(cell);
