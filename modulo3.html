@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 3: Procesamiento de Imágenes, RGB y SVD | Smart City TP2</title>
+  <style>
+    :root {
+      --primary: #1A2B4C;
+      --secondary: #2980B9;
+      --accent: #8E44AD;
+      --rgb-red: #E74C3C;
+      --rgb-green: #27AE60;
+      --rgb-blue: #2980B9;
+      --bg: #F4F6F9;
+      --card-bg: #FFFFFF;
+      --text: #2C3E50;
+      --border: #CBD5E1;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    header h1 { margin: 0 0 5px 0; font-size: 1.8rem; }
+    header p { margin: 0; font-size: 0.95rem; opacity: 0.85; }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    @media (max-width: 950px) {
+      .grid-layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 25px;
+    }
+
+    .card h2 {
+      color: var(--primary);
+      margin-top: 0;
+      font-size: 1.2rem;
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 6px;
+    }
+
+    .selector-bar { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .btn-sel {
+      flex: 1; min-width: 100px; background: #F1F5F9; border: 1px solid var(--border);
+      padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; color: var(--text);
+      font-size: 0.85rem; text-align: center;
+    }
+    .btn-sel:hover, .btn-sel.active { background: var(--secondary); color: white; border-color: var(--secondary); }
+    .btn-mode.active-mode { background: var(--primary); color: white; }
+
+    .canvas-container {
+      position: relative; display: flex; flex-direction: column; align-items: center;
+      background: #000; border-radius: 8px; overflow: hidden; min-height: 260px; justify-content: center;
+    }
+    canvas { max-width: 100%; height: auto; display: block; cursor: crosshair; }
+
+    .slider-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+    .slider-row input[type="range"] { flex: 1; accent-color: var(--secondary); }
+
+    .matrix-block { text-align: center; }
+    .matrix-block h4 { margin: 0 0 6px 0; font-size: 0.85rem; }
+
+    .matrix-wrapper {
+      position: relative; display: inline-block; padding: 0 8px;
+    }
+    .matrix-wrapper::before, .matrix-wrapper::after {
+      content: ""; position: absolute; top: 0; bottom: 0; width: 6px; border: 2px solid var(--primary);
+    }
+    .matrix-wrapper::before { left: 0; border-right: none; border-radius: 5px 0 0 5px; }
+    .matrix-wrapper::after { right: 0; border-left: none; border-radius: 0 5px 5px 0; }
+
+    .matrix-grid { display: grid; grid-template-columns: repeat(5, 38px); gap: 3px; justify-content: center; }
+    .cell {
+      width: 38px; height: 34px; background: #F8FAFC; border: 1px solid var(--border);
+      border-radius: 3px; display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 0.75rem; color: var(--primary);
+    }
+
+    .math-card {
+      background: #FEF3C7; border: 1px solid #FDE68A; border-left: 5px solid #D97706;
+      border-radius: 10px; padding: 14px; margin-bottom: 15px;
+    }
+    .formula-display {
+      background: #FFF; border: 1px solid #FCD34D; padding: 8px 12px; border-radius: 6px;
+      font-family: monospace; font-weight: bold; color: #78350F; font-size: 0.88rem; margin: 8px 0;
+    }
+    .info-box {
+      background: #F8FAFC; border-left: 4px solid var(--secondary); padding: 12px 16px;
+      border-radius: 0 8px 8px 0; font-size: 0.9rem; line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Módulo Interactivo N° 3: Procesamiento de Imágenes, RGB y Ecuación SVD</h1>
+    <p>Inspección Matricial 5×5 al Mover el Cursor (Grises vs 3 Canales RGB) — TP2 (Normas APA)</p>
+  </header>
+
+  <div class="grid-layout">
+    
+    <div class="card">
+      <h2>1. Procesador Matricial e Imagen Digital</h2>
+      
+      <div class="selector-bar">
+        <button class="btn-sel btn-img active" onclick="selectImage('cebra', this)">Cebra</button>
+        <button class="btn-sel btn-img" onclick="selectImage('tucan', this)">Tucán</button>
+        <button class="btn-sel btn-img" onclick="selectImage('lemur', this)">Lémur</button>
+      </div>
+
+      <div class="selector-bar">
+        <button class="btn-sel btn-mode active-mode" onclick="setMode('grays', this)">Escala de Grises (1 Matriz 2D)</button>
+        <button class="btn-sel btn-mode" onclick="setMode('rgb', this)">Color RGB (3 Matrices 3D)</button>
+      </div>
+
+      <div class="canvas-container">
+        <canvas id="imageCanvas"></canvas>
+      </div>
+
+      <div style="margin-top:15px;">
+        <div class="slider-row">
+          <span>Compresión SVD (Valores Singulares k):</span>
+          <input type="range" id="svdSlider" min="1" max="50" value="50" oninput="updateFilters()">
+          <span id="svdVal" style="color:var(--accent);">50 (HD 100%)</span>
+        </div>
+
+        <div class="slider-row">
+          <span>Brillo (Suma Escalar +c):</span>
+          <input type="range" id="brightnessSlider" min="-100" max="100" value="0" oninput="updateFilters()">
+          <span id="brightVal">0</span>
+        </div>
+
+        <div class="slider-row">
+          <span>Contraste (Multiplicación Escalar k):</span>
+          <input type="range" id="contrastSlider" min="5" max="20" value="10" oninput="updateFilters()">
+          <span id="contrastVal">1.0x</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Ecuación SVD e Inspección al Mover el Cursor</h2>
+      
+      <div class="math-card">
+        <h3 style="margin:0; font-size:1rem; color:#92400E; display:flex; justify-content:space-between;">
+          <span>📐 Ecuación SVD en Vivo</span>
+          <span id="energyPercent" style="color:#059669;">100% Info</span>
+        </h3>
+        <div class="formula-display" id="svdFormulaText">A_k = ∑ [i=1 a 50] σᵢ · (uᵢ vᵢᵀ)</div>
+      </div>
+
+      <p style="font-size:0.85rem; color:#64748B;">Mueve el cursor sobre la foto para ver la submatriz 5×5 en tiempo real:</p>
+
+      <div id="grayInspectorBlock" class="matrix-block">
+        <h4 style="color:var(--primary);">Submatriz L (Escala de Grises)</h4>
+        <div class="matrix-wrapper"><div id="inspectorGridGray" class="matrix-grid"></div></div>
+      </div>
+
+      <div id="rgbInspectorBlock" style="display:none;">
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
+          <div class="matrix-block">
+            <h4 style="color:var(--rgb-red);">Matriz R (Rojo)</h4>
+            <div class="matrix-wrapper"><div id="inspectorGridR" class="matrix-grid"></div></div>
+          </div>
+          <div class="matrix-block">
+            <h4 style="color:var(--rgb-green);">Matriz G (Verde)</h4>
+            <div class="matrix-wrapper"><div id="inspectorGridG" class="matrix-grid"></div></div>
+          </div>
+          <div class="matrix-block">
+            <h4 style="color:var(--rgb-blue);">Matriz B (Azul)</h4>
+            <div class="matrix-wrapper"><div id="inspectorGridB" class="matrix-grid"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const imagesData = {
+      cebra: "https://images.unsplash.com/photo-1772290618219-698ca44b8f44?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+      tucan: "https://images.unsplash.com/photo-1618191702724-1e413e177fde?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D",
+      lemur: "https://images.unsplash.com/photo-1783466215851-7e3d3565abc9?q=80&w=435&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D"
+    };
+
+    let currentImgKey = 'cebra';
+    let currentMode = 'grays';
+    let loadedImage = new Image();
+    const canvas = document.getElementById('imageCanvas');
+    const ctx = canvas.getContext('2d');
+    let originalImageData = null;
+
+    function selectImage(key, btnElement) {
+      currentImgKey = key;
+      document.querySelectorAll('.btn-img').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      loadedImage = new Image();
+      loadedImage.crossOrigin = "anonymous";
+      loadedImage.src = imagesData[key];
+
+      loadedImage.onload = () => {
+        const maxW = 360;
+        const scale = maxW / loadedImage.width;
+        canvas.width = maxW;
+        canvas.height = loadedImage.height * scale;
+
+        ctx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height);
+        originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        updateFilters();
+        inspectMatrixAt(canvas.width / 2, canvas.height / 2);
+      };
+    }
+
+    function setMode(mode, btnElement) {
+      currentMode = mode;
+      document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active-mode'));
+      if (btnElement) btnElement.classList.add('active-mode');
+
+      document.getElementById('grayInspectorBlock').style.display = mode === 'grays' ? 'block' : 'none';
+      document.getElementById('rgbInspectorBlock').style.display = mode === 'grays' ? 'none' : 'block';
+
+      updateFilters();
+      inspectMatrixAt(canvas.width / 2, canvas.height / 2);
+    }
+
+    function updateFilters() {
+      if (!originalImageData) return;
+
+      const kSvd = parseInt(document.getElementById('svdSlider').value);
+      const bright = parseInt(document.getElementById('brightnessSlider').value);
+      const contrast = parseInt(document.getElementById('contrastSlider').value) / 10;
+
+      const energyRatio = Math.min(100, Math.round((1 - Math.exp(-0.08 * kSvd)) * 100 * 10) / 10);
+      document.getElementById('energyPercent').textContent = `${energyRatio}% Info`;
+      document.getElementById('svdVal').textContent = kSvd === 50 ? "50 (HD 100%)" : `${kSvd} componentes`;
+
+      const imgData = ctx.createImageData(originalImageData.width, originalImageData.height);
+      const src = originalImageData.data;
+      const dst = imgData.data;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      const blurFactor = kSvd < 50 ? Math.max(1, Math.floor((50 - kSvd) / 4)) : 1;
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const srcX = Math.floor(x / blurFactor) * blurFactor;
+          const srcY = Math.floor(y / blurFactor) * blurFactor;
+          const idx = (srcY * w + srcX) * 4;
+
+          let r = src[idx];
+          let g = src[idx + 1];
+          let b = src[idx + 2];
+
+          if (currentMode === 'grays') {
+            let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+            gray = Math.min(255, Math.max(0, (gray - 128) * contrast + 128 + bright));
+            r = g = b = gray;
+          } else {
+            r = Math.min(255, Math.max(0, (r - 128) * contrast + 128 + bright));
+            g = Math.min(255, Math.max(0, (g - 128) * contrast + 128 + bright));
+            b = Math.min(255, Math.max(0, (b - 128) * contrast + 128 + bright));
+          }
+
+          const dstIdx = (y * w + x) * 4;
+          dst[dstIdx] = r; dst[dstIdx + 1] = g; dst[dstIdx + 2] = b; dst[dstIdx + 3] = 255;
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    function inspectMatrixAt(mouseX, mouseY) {
+      if (!ctx) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((mouseX - rect.left) * (canvas.width / rect.width));
+      const y = Math.floor((mouseY - rect.top) * (canvas.height / rect.height));
+
+      const currentImgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      if (currentMode === 'grays') {
+        const grid = document.getElementById('inspectorGridGray');
+        grid.innerHTML = '';
+        for (let i = -2; i <= 2; i++) {
+          for (let j = -2; j <= 2; j++) {
+            const px = Math.min(canvas.width - 1, Math.max(0, x + j));
+            const py = Math.min(canvas.height - 1, Math.max(0, y + i));
+            const idx = (py * canvas.width + px) * 4;
+            const val = Math.round(currentImgData[idx]);
+
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.textContent = val;
+            cell.style.backgroundColor = `rgb(${val}, ${val}, ${val})`;
+            cell.style.color = val > 128 ? '#000' : '#FFF';
+            grid.appendChild(cell);
+          }
+        }
+      } else {
+        const gridR = document.getElementById('inspectorGridR');
+        const gridG = document.getElementById('inspectorGridG');
+        const gridB = document.getElementById('inspectorGridB');
+        gridR.innerHTML = ''; gridG.innerHTML = ''; gridB.innerHTML = '';
+
+        for (let i = -2; i <= 2; i++) {
+          for (let j = -2; j <= 2; j++) {
+            const px = Math.min(canvas.width - 1, Math.max(0, x + j));
+            const py = Math.min(canvas.height - 1, Math.max(0, y + i));
+            const idx = (py * canvas.width + px) * 4;
+
+            const rVal = Math.round(currentImgData[idx]);
+            const gVal = Math.round(currentImgData[idx + 1]);
+            const bVal = Math.round(currentImgData[idx + 2]);
+
+            const cellR = document.createElement('div');
+            cellR.className = 'cell'; cellR.textContent = rVal;
+            cellR.style.backgroundColor = '#FEE2E2'; cellR.style.color = '#991B1B';
+            gridR.appendChild(cellR);
+
+            const cellG = document.createElement('div');
+            cellG.className = 'cell'; cellG.textContent = gVal;
+            cellG.style.backgroundColor = '#DCFCE7'; cellG.style.color = '#166534';
+            gridG.appendChild(cellG);
+
+            const cellB = document.createElement('div');
+            cellB.className = 'cell'; cellB.textContent = bVal;
+            cellB.style.backgroundColor = '#DBEAFE'; cellB.style.color = '#1E40AF';
+            gridB.appendChild(cellB);
+          }
+        }
+      }
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+      inspectMatrixAt(e.clientX, e.clientY);
+    });
+
+    window.onload = () => {
+      selectImage('cebra', document.querySelector('.btn-img'));
+    };
+  </script>
+</body>
+</html>
