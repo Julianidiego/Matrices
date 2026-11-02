@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorio de Gamificación Matricial | Go! Gauss</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --bg:#0f172a; --panel:#1e293b; --line:#334155; --blue:#38bdf8; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; color:#f8fafc; background:var(--bg); font-family:Inter,Segoe UI,sans-serif; }
+    .background { position:fixed; inset:-50%; z-index:-1; background:radial-gradient(circle,rgba(14,165,233,.15),transparent 55%),radial-gradient(circle at 80% 20%,rgba(56,189,248,.1),transparent 40%); animation:spin 60s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .screen { display:none; min-height:100vh; padding:2rem 1rem; align-items:center; flex-direction:column; justify-content:center; }
+    .screen.active { display:flex; }
+    .panel { width:100%; max-width:42rem; background:var(--panel); border:2px solid var(--line); border-radius:.75rem; padding:1rem; box-shadow:0 10px 25px #0008; }
+    .btn { border:2px solid #7dd3fc; border-radius:.5rem; padding:.7rem 1rem; color:white; font-weight:700; background:linear-gradient(#38bdf8,#0284c7); cursor:pointer; }
+    .btn:hover { filter:brightness(1.1); } .btn:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-green { background:linear-gradient(#4ade80,#16a34a); border-color:#bbf7d0; }
+    .btn-red { background:linear-gradient(#f87171,#dc2626); border-color:#fecaca; }
+    .matrix { display:grid; gap:4px; padding:1rem; background:#0f172a; border:2px solid var(--line); border-radius:.75rem; overflow:auto; }
+    .cell { width:4rem; height:3rem; display:flex; align-items:center; justify-content:center; border-radius:.25rem; background:#cbd5e1; color:#0f172a; font-weight:800; font-size:1.15rem; }
+    .identity { background:#94a3b8; } .input { width:100%; height:100%; border:0; outline:0; text-align:center; background:transparent; color:#0f172a; font-weight:800; font-size:1.1rem; }
+    .field { background:#0f172a; color:white; border:2px solid var(--line); border-radius:.35rem; padding:.5rem; text-align:center; }
+    .hud { display:flex; justify-content:space-between; gap:.75rem; width:100%; max-width:42rem; margin-bottom:1rem; }
+    .hud-box { flex:1; text-align:center; background:var(--panel); border:2px solid var(--line); border-radius:.5rem; padding:.5rem; }
+    .tabs { display:flex; border-bottom:2px solid var(--line); margin-bottom:1rem; }
+    .tab { flex:1; padding:.5rem; color:#94a3b8; cursor:pointer; text-align:center; font-weight:700; }
+    .tab.active { color:var(--blue); border-bottom:2px solid var(--blue); }
+    .content { display:none; } .content.active { display:block; }
+    .modal { position:fixed; inset:0; display:none; place-items:center; padding:1rem; background:#0f172ae8; }
+    .modal.open { display:grid; }
+  </style>
+</head>
+<body>
+  <div class="background"></div>
+  <section id="menu" class="screen active">
+    <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">GO! GAUSS</h1>
+    <p class="text-slate-400 text-lg mb-8">Laboratorio de Gamificación Matricial</p>
+    <div class="flex flex-col gap-3 w-full max-w-xs">
+      <button class="btn" onclick="choose('random')">Generar aleatoria</button>
+      <button class="btn" onclick="choose('custom')">Matriz personalizada</button>
+      <button class="btn btn-red" onclick="message('Cómo jugar','Convierte la mitad izquierda en la matriz identidad usando intercambios, escalado y suma de múltiplos de filas.')">Tutorial / Info</button>
+    </div>
+  </section>
+
+  <section id="sizes" class="screen">
+    <h2 class="text-3xl font-bold mb-6">Selecciona el tamaño</h2>
+    <div class="flex gap-3 mb-6"><button class="btn" onclick="start(2)">2 × 2</button><button class="btn" onclick="start(3)">3 × 3</button><button class="btn" onclick="start(4)">4 × 4</button></div>
+    <button class="text-slate-400 underline" onclick="showScreen('menu')">Volver</button>
+  </section>
+
+  <section id="custom" class="screen">
+    <h2 class="text-2xl font-bold mb-2">Ingresa tu matriz</h2><p class="text-slate-400 mb-5">Usa enteros o fracciones, por ejemplo: -1/2</p>
+    <div class="panel mb-5"><div id="customGrid" class="matrix"></div></div>
+    <div class="flex gap-3"><button class="btn" onclick="showScreen('sizes')">Atrás</button><button class="btn btn-green" onclick="startCustom()">¡Jugar!</button></div>
+  </section>
+
+  <section id="game" class="screen justify-start">
+    <div class="hud"><div class="hud-box"><small>Pasos</small><strong id="steps">0</strong></div><div class="hud-box"><small>Puntos</small><strong id="score" class="text-green-400">10000</strong></div><div class="hud-box"><small>Pistas</small><button class="text-yellow-400 font-bold" onclick="hint()">∞<br><small class="text-red-400">-500 pts</small></button></div></div>
+    <div id="matrixWrap" class="panel mb-5"><div id="gameGrid" class="matrix"></div></div>
+    <div class="panel">
+      <div class="tabs"><div class="tab active" onclick="tab(1)">Intercambiar</div><div class="tab" onclick="tab(2)">Escalar</div><div class="tab" onclick="tab(3)">Sumar múltiplo</div></div>
+      <div id="content1" class="content active"><div class="flex gap-2 justify-center mb-4">Fila <select id="swapA" class="field"></select> ↔ Fila <select id="swapB" class="field"></select></div><button class="btn w-full" onclick="swapRows()">Aplicar</button></div>
+      <div id="content2" class="content"><div class="flex gap-2 justify-center mb-4">Fila <select id="scaleRow" class="field"></select> × <input id="scaleValue" class="field w-24" placeholder="1/2"></div><button class="btn w-full" onclick="scaleRow()">Aplicar</button></div>
+      <div id="content3" class="content"><div class="flex flex-wrap gap-2 justify-center mb-4">Fila <select id="addTarget" class="field"></select> = Fila <span id="targetLabel">1</span> + (<input id="addValue" class="field w-20" placeholder="-2"> × Fila <select id="addSource" class="field"></select>)</div><button class="btn w-full" onclick="addRows()">Aplicar</button></div>
+    </div>
+    <button class="text-slate-500 underline mt-6" onclick="showScreen('menu')">Rendirse y salir</button>
+  </section>
+
+  <section id="victory" class="screen">
+    <h2 class="text-4xl font-black text-green-400 mb-2">¡MATRIZ RESUELTA!</h2><p class="text-xl mb-6">Puntuación final: <b id="finalScore" class="text-cyan-400"></b></p>
+    <div class="panel mb-6 text-center"><h3 class="font-bold mb-3">Validación matemática</h3><div id="validation" class="flex items-center justify-center gap-3 overflow-auto"></div></div>
+    <button class="btn" onclick="showScreen('menu')">Volver al menú</button>
+  </section>
+
+  <div id="modal" class="modal"><div class="panel"><h3 id="modalTitle" class="text-xl font-bold mb-2"></h3><p id="modalText" class="text-slate-300 whitespace-pre-line mb-5"></p><button class="btn w-full" onclick="document.getElementById('modal').classList.remove('open')">Entendido</button></div></div>
+
+  <script>
+    class F { constructor(n,d=1){if(d===0)throw Error('División por cero');if(d<0){n=-n;d=-d;}const g=(a,b)=>b?g(b,a%b):a;const q=g(Math.abs(n),Math.abs(d));this.n=n/q;this.d=d/q;} add(x){return new F(this.n*x.d+x.n*this.d,this.d*x.d)} mul(x){return new F(this.n*x.n,this.d*x.d)} div(x){return new F(this.n*x.d,this.d*x.n)} zero(){return this.n===0} one(){return this.n===1&&this.d===1} str(){return this.d===1?String(this.n):`${this.n}/${this.d}`} static parse(s){s=String(s||'').replace(/\s/g,'');const p=s.split('/');if(p.length>2||!p[0]||isNaN(+p[0])||(p[1]!==undefined&&(isNaN(+p[1])||!+p[1])))throw Error('Número o fracción inválida');return new F(+p[0],p[1]===undefined?1:+p[1]);} }
+    const Z=new F(0), O=new F(1); let mode='random', size=3, A=[], M=[], steps=0, score=10000;
+    const showScreen=id=>{document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active')};
+    const message=(t,x)=>{modalTitle.textContent=t;modalText.textContent=x;modal.classList.add('open')};
+    const identity=n=>Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?O:Z));
+    const clone=m=>m.map(r=>r.map(x=>new F(x.n,x.d)));
+    function randomMatrix(n){let m=identity(n);for(let z=0;z<n*4;z++){let a=Math.floor(Math.random()*n),b=Math.floor(Math.random()*n),k=new F([1,-1,2,-2][Math.floor(Math.random()*4)]);if(a===b){m[a]=m[a].map(x=>x.mul(new F(2)));}else m[a]=m[a].map((x,j)=>x.add(k.mul(m[b][j])))}return m}
+    function choose(x){mode=x;showScreen('sizes')}
+    function start(n){size=n;if(mode==='custom'){customGrid.style.gridTemplateColumns=`repeat(${n},4rem)`;customGrid.innerHTML=Array.from({length:n*n},(_,i)=>`<div class="cell"><input id="c${i}" class="input" placeholder="0"></div>`).join('');showScreen('custom')}else{A=randomMatrix(n);init()}}
+    function startCustom(){try{A=Array.from({length:size},(_,i)=>Array.from({length:size},(_,j)=>F.parse(document.getElementById(`c${i*size+j}`).value||0)));init()}catch(e){message('Error de entrada','Usa solamente números o fracciones válidas.')}} 
+    function init(){M=A.map((r,i)=>r.concat(identity(size)[i]));steps=0;score=10000;fillSelects();render();showScreen('game')}
+    function fillSelects(){const ids=['swapA','swapB','scaleRow','addTarget','addSource'];ids.forEach(id=>document.getElementById(id).innerHTML=Array.from({length:size},(_,i)=>`<option value="${i}">${i+1}</option>`).join(''));addTarget.onchange=()=>targetLabel.textContent=+addTarget.value+1}
+    function render(){stepsEl.textContent=steps;scoreEl.textContent=score;gameGrid.style.gridTemplateColumns=`repeat(${size*2},4rem)`;gameGrid.innerHTML=M.flatMap((r,i)=>r.map((v,j)=>`<div class="cell ${j>=size?'identity':''}">${v.str()}</div>`)).join('');}
+    const stepsEl=document.getElementById('steps'),scoreEl=document.getElementById('score');
+    function commit(){steps++;score=Math.max(0,score-50);render();if(win())setTimeout(()=>{finalScore.textContent=score;validation.innerHTML=matrixHTML(A,'text-white')+'×'+matrixHTML(M.map(r=>r.slice(size)),'text-cyan-400')+'='+matrixHTML(identity(size),'text-green-400');showScreen('victory')},500)}
+    function swapRows(){let a=+swapA.value,b=+swapB.value;if(a===b)return message('Aviso','Selecciona filas diferentes.');[M[a],M[b]]=[M[b],M[a]];commit()}
+    function scaleRow(){try{let r=+scaleRowEl.value,k=F.parse(scaleValue.value);if(k.zero())throw Error('El escalar no puede ser cero.');M[r]=M[r].map(x=>x.mul(k));scaleValue.value='';commit()}catch(e){message('Error',e.message)}}
+    const scaleRowEl=document.getElementById('scaleRow');
+    function addRows(){try{let a=+addTarget.value,b=+addSource.value;if(a===b)return message('Error','Selecciona filas diferentes.');let k=F.parse(addValue.value);M[a]=M[a].map((x,j)=>x.add(k.mul(M[b][j])));addValue.value='';commit()}catch(e){message('Error',e.message)}}
+    function win(){return M.every((r,i)=>r.slice(0,size).every((x,j)=>i===j?x.one():x.zero()))}
+    function hint(){score=Math.max(0,score-500);for(let c=0;c<size;c++){if(M[c][c].zero()){let r=M.findIndex((x,i)=>i>c&&!x[c].zero());return message('Pista educativa',r<0?'La matriz no parece invertible.':`Intercambia la Fila ${c+1} con la Fila ${r+1}.`)}if(!M[c][c].one())return message('Pista educativa',`Multiplica la Fila ${c+1} por ${M[c][c].div(O).str()==='0'?'1':new F(1).div(M[c][c]).str()}.`);let r=M.findIndex((x,i)=>i!==c&&!x[c].zero());if(r>=0)return message('Pista educativa',`Suma ${new F(0).add(new F(-M[r][c].n,M[r][c].d)).str()} × Fila ${c+1} a la Fila ${r+1}.`)}message('Pista educativa','¡La matriz ya está resuelta!')}
+    function tab(n){document.querySelectorAll('.tab').forEach((x,i)=>x.classList.toggle('active',i===n-1));document.querySelectorAll('.content').forEach((x,i)=>x.classList.toggle('active',i===n-1))}
+    function matrixHTML(m,c){return `<div class="grid gap-1 p-1 bg-slate-700 rounded" style="grid-template-columns:repeat(${m[0].length},2rem)">${m.flat().map(x=>`<div class="text-center bg-slate-800 ${c}">${x.str()}</div>`).join('')}</div>`}
+  </script>
+</body>
+</html>
