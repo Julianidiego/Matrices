@@ -4,11 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Módulo 1: Tipos de Matrices | Smart City TP2</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css">
   <style>
     :root {
       --primary: #1A2B4C;
@@ -160,29 +156,13 @@
       font-weight: bold;
       margin-bottom: 6px;
     }
-
-    :root { --primary:#e2e8f0; --secondary:#00f0ff; --bg:#0b0f19; --card-bg:rgba(15,23,42,.75); --text:#cbd5e1; --border:rgba(255,255,255,.1); }
-    body { font-family:'Plus Jakarta Sans',sans-serif; background:radial-gradient(circle at 15% 0%,rgba(0,240,255,.1),transparent 30%),radial-gradient(circle at 90% 100%,rgba(139,92,246,.12),transparent 34%),var(--bg); color:var(--text); }
-    header { background:linear-gradient(135deg,rgba(0,240,255,.16),rgba(139,92,246,.25)); border:1px solid rgba(255,255,255,.1); box-shadow:0 12px 40px rgba(0,0,0,.3); backdrop-filter:blur(12px); }
-    header h1 { color:#f8fafc; letter-spacing:-.03em; }
-    .card { background:var(--card-bg); border:1px solid var(--border); box-shadow:0 12px 32px rgba(0,0,0,.22); backdrop-filter:blur(12px); }
-    .card h2 { color:#f8fafc; border-bottom-color:var(--secondary); }
-    .matrix-wrapper::before,.matrix-wrapper::after { border-color:var(--secondary); }
-    .cell { background:rgba(30,41,59,.9); border-color:rgba(255,255,255,.1); color:#e0f2fe; }
-    .cell:hover { background:rgba(0,240,255,.15); border-color:var(--secondary); }
-    .cell-diag { background:rgba(139,92,246,.32); border-color:#a78bfa; }
-    .cell-zero { background:rgba(15,23,42,.85); color:#64748b; }
-    .btn-type { background:rgba(30,41,59,.8); border-color:var(--border); color:#cbd5e1; }
-    .btn-type:hover,.btn-type.active { background:linear-gradient(135deg,#00a9b5,#7c3aed); border-color:var(--secondary); }
-    .info-box { background:rgba(15,23,42,.58); border-left-color:var(--secondary); }
-    .badge { background:linear-gradient(135deg,#0891b2,#7c3aed); }
   </style>
 </head>
 <body>
 
   <header>
     <h1>Módulo Interactivo N° 1: Clasificación de Matrices y Estructura m × n</h1>
-    <p>Definiciones Formales, Dimensiones y Tipología de Arreglos — TP2 (Normas APA)</p>
+    <p>Definiciones Formales, Dimensiones y Tipología de Arreglos — TP2 </p>
   </header>
 
   <div class="grid-layout">
@@ -209,8 +189,8 @@
         <button class="btn-type active" onclick="loadType('identidad', this)">1. Identidad (I₃)</button>
         <button class="btn-type" onclick="loadType('cuadrada', this)">2. Cuadrada (3×3)</button>
         <button class="btn-type" onclick="loadType('rectangular', this)">3. Rectangular (2×4)</button>
-        <button class="btn-type" onclick="loadType('fila', this)">4. Vector Fila (1×4)</button>
-        <button class="btn-type" onclick="loadType('columna', this)">5. Vector Columna (4×1)</button>
+        <button class="btn-type" onclick="loadType('fila', this)">4. Vector Columna (4×1)</button>
+        <button class="btn-type" onclick="loadType('columna', this)">5. Vector Fila (1×4)</button>
         <button class="btn-type" onclick="loadType('nula', this)">6. Nula (0₃ₓ₃)</button>
         <button class="btn-type" onclick="loadType('diagonal', this)">7. Diagonal</button>
         <button class="btn-type" onclick="loadType('escalar', this)">8. Escalar</button>
