@@ -113,7 +113,7 @@
     }
     .info-box {
       background: #F8FAFC; border-left: 4px solid var(--secondary); padding: 12px 16px;
-      border-radius: 0 8px 8px 0; font-size: 0.9rem; line-height: 1.5;
+      border-radius: 0 8px 8px 0; font-size: 0.85rem; line-height: 1.5; margin-top: 15px;
     }
   </style>
 </head>
@@ -121,7 +121,7 @@
 
   <header>
     <h1>Módulo Interactivo N° 3: Procesamiento de Imágenes, RGB y Ecuación SVD</h1>
-    <p>Inspección Matricial 5×5 al Mover el Cursor (Grises vs 3 Canales RGB) — TP2 (Normas APA)</p>
+    <p>Inspección Matricial 5×5 al Mover el Cursor (Teoría de Grises 2D vs Color 3D) — TP2 (Normas APA)</p>
   </header>
 
   <div class="grid-layout">
@@ -166,20 +166,27 @@
     </div>
 
     <div class="card">
-      <h2>2. Ecuación SVD e Inspección al Mover el Cursor</h2>
+      <h2>2. Fundamento Teórico y Submatriz 5×5 en Vivo</h2>
       
       <div class="math-card">
         <h3 style="margin:0; font-size:1rem; color:#92400E; display:flex; justify-content:space-between;">
-          <span>📐 Ecuación SVD en Vivo</span>
+          <span>📐 Ecuación SVD y Modelo de Datos</span>
           <span id="energyPercent" style="color:#059669;">100% Info</span>
         </h3>
         <div class="formula-display" id="svdFormulaText">A_k = ∑ [i=1 a 50] σᵢ · (uᵢ vᵢᵀ)</div>
       </div>
 
-      <p style="font-size:0.85rem; color:#64748B;">Mueve el cursor sobre la foto para ver la submatriz 5×5 en tiempo real:</p>
+      <!-- Explicación pedagógica requerida por el usuario -->
+      <div class="info-box" id="modeExplanation" style="margin-bottom: 15px;">
+        <b>¿Por qué 2D vs 3D?</b><br>
+        • <b>Escala de Grises (2D):</b> Se representa mediante <i>una sola matriz bidimensional</i> donde cada celda almacena un valor único de intensidad lumínica (de 0 a 255)[cite: 3].<br>
+        • <b>Color RGB (3D):</b> Se representa mediante <i>tres matrices bidimensionales superpuestas</i> (Rojo, Verde y Azul), formando un bloque matricial tridimensional donde cada píxel combina los tres canales primarios[cite: 3].
+      </div>
+
+      <p style="font-size:0.85rem; color:#64748B;">Mueve el cursor sobre la foto para auditar la submatriz de 5×5 píxeles en tiempo real:</p>
 
       <div id="grayInspectorBlock" class="matrix-block">
-        <h4 style="color:var(--primary);">Submatriz L (Escala de Grises)</h4>
+        <h4 style="color:var(--primary);">Submatriz L (Escala de Grises - Valores 0 a 255)</h4>
         <div class="matrix-wrapper"><div id="inspectorGridGray" class="matrix-grid"></div></div>
       </div>
 
@@ -228,7 +235,7 @@
       loadedImage.src = imagesData[key];
 
       loadedImage.onload = () => {
-        const maxW = 360;
+        const maxW = 340;
         const scale = maxW / loadedImage.width;
         canvas.width = maxW;
         canvas.height = loadedImage.height * scale;
@@ -258,6 +265,9 @@
       const kSvd = parseInt(document.getElementById('svdSlider').value);
       const bright = parseInt(document.getElementById('brightnessSlider').value);
       const contrast = parseInt(document.getElementById('contrastSlider').value) / 10;
+
+      document.getElementById('brightVal').textContent = bright;
+      document.getElementById('contrastVal').textContent = contrast.toFixed(1) + 'x';
 
       const energyRatio = Math.min(100, Math.round((1 - Math.exp(-0.08 * kSvd)) * 100 * 10) / 10);
       document.getElementById('energyPercent').textContent = `${energyRatio}% Info`;
